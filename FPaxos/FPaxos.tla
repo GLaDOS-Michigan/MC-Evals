@@ -9,7 +9,7 @@ ASSUME QuorumAssumption == /\ \A Q \in Quorum1 : Q \subseteq Acceptor   \* Set o
                            /\ \A Q \in Quorum2 : Q \subseteq Acceptor   \* Set of Phase 2 quorums
                            /\ \A Q1 \in Quorum1 : \A Q2 \in Quorum2 : Q1 \cap Q2 # {}
 
-None == CHOOSE v : v \notin Ballot  
+None == CHOOSE v : v \notin Value  
 
 Message ==      [type : {"1a"}, bal : Ballot]  \* Set of all records with type in set {"1a"} and bal in set Ballot
            \cup [type : {"1b"}, acc : Acceptor, bal : Ballot,
@@ -98,7 +98,7 @@ Agreed(v,b) == \E Q \in Quorum2: \A a \in Q: Sent2b(a,v,b)
 NoFutureProposal(v,b) == \A v2 \in Value: \A b2 \in Ballot: (b2 > b /\ Sent2a(v2,b2)) => v=v2
 
 \* Safety: If (v, b) is agreed, then all proposals with ballot >b must be of value v
-SafeValue == \A v \in Value: \A b \in Ballot: Agreed(v,b) => NoFutureProposal(v,b)
+SafeValue == \A v \in Value: \A b \in Ballot: Agreed(v,b) => (NoFutureProposal(v,b) /\ ~ v = None)
 
 =============================================================================
 \* Modification History
