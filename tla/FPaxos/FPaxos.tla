@@ -97,8 +97,11 @@ Agreed(v,b) == \E Q \in Quorum2: \A a \in Q: Sent2b(a,v,b)
 \* All proposals with ballot >b must be of value v
 NoFutureProposal(v,b) == \A v2 \in Value: \A b2 \in Ballot: (b2 > b /\ Sent2a(v2,b2)) => v=v2
 
+NotNone2a == \A m \in msgs : m.type = "2a" => m.val \in Value
+NotNone2b == \A m \in msgs : m.type = "2b" => m.val \in Value
+
 \* Safety: If (v, b) is agreed, then all proposals with ballot >b must be of value v
-SafeValue == \A v \in Value \cup {None}: \A b \in Ballot: Agreed(v,b) => (NoFutureProposal(v,b) /\ ~ v = None)
+SafeValue == \A v \in Value \cup {None}: \A b \in Ballot: Agreed(v,b) => (NoFutureProposal(v,b) /\ v \in Value)
 
 =============================================================================
 
