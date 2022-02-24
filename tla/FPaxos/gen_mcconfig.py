@@ -60,7 +60,7 @@ def gen_cfg_file(num_accs, num_vals, num_bals, q1_size):
     res.append("\* SYMMETRY definition")
     res.append("SYMMETRY symmetries")
     res.append("")
-    res.append("INVARIANT SafeValue TypeOK")
+    res.append("INVARIANT NotNone2a NotNone2b SafeValue TypeOK")
     return "\n".join(res)
 
 def powerset(iterable):
