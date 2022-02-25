@@ -2,5 +2,5 @@
 
 states/
 *.toolbox
-MCFPaxos.cfg
-MCFPaxos.tla
+MCEPaxos.cfg
+MCEPaxos.tla

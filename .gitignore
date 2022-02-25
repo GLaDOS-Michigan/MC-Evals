@@ -1,6 +1,2 @@
 .DS_Store
 tla-bin/
-
-*.toolbox
-MCFPaxos.cfg
-MCFPaxos.tla
