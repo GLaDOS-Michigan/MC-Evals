@@ -550,7 +550,8 @@ PrepareFinalize(replica, i, Q) ==
                                                              p1.seq # p2.seq
                                \/ \E pl \in preaccepts : pl.src = i[1]
                                \/ Cardinality(preaccepts) < Cardinality(Q) \div 2
-                            /\ preaccepts # {}
+                            \* /\ preaccepts # {}
+                            /\ \E pac \in preaccepts : pac.cmd # none   \* TONY: Added so that following CHOOSE line can't fail
                             /\ LET pac == CHOOSE pac \in preaccepts : pac.cmd # none IN
                                 /\ StartPhase1(pac.cmd, replica, Q, i, rec.ballot, replies)
                                 /\ preparing' = [preparing EXCEPT ![replica] = @ \ {i}]
