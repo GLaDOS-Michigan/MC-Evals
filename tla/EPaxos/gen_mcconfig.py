@@ -19,14 +19,13 @@ def gen_tla_file(num_replicas, num_commands, num_bals):
     res.append("EXTENDS EPaxos, TLC")
     res.append("CONSTANTS %s" %(", ".join(replicas)))
     res.append("CONSTANTS %s" %(", ".join(commands)))
-    res.append("CONSTANT n")
     res.append("")
     res.append("MC_Replicas == {" + ", ".join(replicas) + "}")
     res.append("MC_Commands == {" + ", ".join(commands) + "}")
     res.append("MC_MaxBallot == %d" %(num_bals))
     res.append("MC_FastQuorums(x) == { s \in SUBSET Replicas: x \\in s /\ Cardinality(s) = (Cardinality(Replicas) \div 2) + ((Cardinality(Replicas) \div 2) + 1) \div 2}")
     res.append("MC_SlowQuorums(x) == { s \in SUBSET Replicas: x \\in s /\ Cardinality(s) = (Cardinality(Replicas) \div 2) + 1}")
-    # res.append("n ==  CHOOSE c : c \\notin MC_Commands")
+    res.append("n ==  CHOOSE c : c \\notin MC_Commands")
     res.append("")
     res.append("\* SYMMETRY definition")
     if num_commands > 1:
@@ -55,6 +54,7 @@ def gen_cfg_file(num_replicas, num_commands, num_bals):
     res.append("")
     res.append("\* SYMMETRY definition")
     res.append("SYMMETRY symmetries")
+    res.append("PROPERTIES typeok Nontriviality Stability Consistency")
     return "\n".join(res)
 
 if __name__ == "__main__":
