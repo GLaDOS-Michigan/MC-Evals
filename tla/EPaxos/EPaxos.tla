@@ -1,4 +1,3 @@
-
 -------------------------- MODULE EPaxos --------------------------
 
 EXTENDS Naturals, FiniteSets
@@ -14,7 +13,6 @@ Max(S) == IF S = {} THEN 0 ELSE CHOOSE i \in S : \A j \in S : j <= i
 (*       Replicas: the set of all EPaxos replicas                                *)
 (*       FastQuorums(r): the set of all fast quorums where r is a command leader *)
 (*       SlowQuorums(r): the set of all slow quorums where r is a command leader *)
-(*       none: Special none command                                              *)
 (*********************************************************************************)
 
 CONSTANTS Commands, Replicas, FastQuorums(_), SlowQuorums(_), MaxBallot, none
@@ -38,8 +36,6 @@ ASSUME \A r \in Replicas:
     /\ r \in FQ
     /\ Cardinality(FQ) = (Cardinality(Replicas) \div 2) + 
                          ((Cardinality(Replicas) \div 2) + 1) \div 2
-
-ASSUME none \notin Commands
     
     
 (***************************************************************************)
@@ -47,7 +43,6 @@ ASSUME none \notin Commands
 (***************************************************************************)
 
 \* none == CHOOSE c : c \notin Commands
-
 
 (***************************************************************************)
 (* The instance space                                                      *)
@@ -550,8 +545,7 @@ PrepareFinalize(replica, i, Q) ==
                                                              p1.seq # p2.seq
                                \/ \E pl \in preaccepts : pl.src = i[1]
                                \/ Cardinality(preaccepts) < Cardinality(Q) \div 2
-                            \* /\ preaccepts # {}
-                            /\ \E pac \in preaccepts : pac.cmd # none   \* TONY: Added so that following CHOOSE line can't fail
+                            /\ preaccepts # {}
                             /\ LET pac == CHOOSE pac \in preaccepts : pac.cmd # none IN
                                 /\ StartPhase1(pac.cmd, replica, Q, i, rec.ballot, replies)
                                 /\ preparing' = [preparing EXCEPT ![replica] = @ \ {i}]
@@ -709,8 +703,8 @@ Stability ==
 Consistency ==
     \A i \in Instances :
         [](Cardinality(committed[i]) <= 1)
-                                            
 
 THEOREM Spec => ([]TypeOK) /\ Nontriviality /\ Stability /\ Consistency
 
-=============================================================================
+typeok == []TypeOK
+=======================================
