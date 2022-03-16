@@ -1,0 +1,42 @@
+---------------------
+WITHOUT PREPROCESSING
+---------------------
+
+------------
+Size Summary
+------------
+
+State variables (#1)
+	(4-bit)	1
+
+Inputs (#2)
+	(1-bit)	2
+
+Constants (#4)
+	(1-bit)	1
+	(4-bit)	3
+
+---------------
+State Variables
+---------------
+_s0_X                           (4-bit)
+
+------
+Inputs
+------
+_i1_en                          (1-bit)
+_i0_clk                         (1-bit)
+
+---------
+Constants
+---------
+1'd1
+4'd15
+4'd0
+4'd1
+
+-----------------------------
+Uninterpreted Functions (UFs)
+-----------------------------
+Add_4_4_4	#1
+

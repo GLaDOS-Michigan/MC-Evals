@@ -1,0 +1,54 @@
+------------
+Size Summary
+------------
+
+State variables (#1)
+	(4-bit)	1
+
+Inputs (#1)
+	(1-bit)	1
+
+Constants (#3)
+	(4-bit)	3
+
+---------------
+State Variables
+---------------
+_s0_X                           (4-bit)
+
+------
+Inputs
+------
+_i1_en                          (1-bit)
+
+---------
+Constants
+---------
+4'd0
+4'd15
+4'd1
+
+-----------------------------
+Uninterpreted Functions (UFs)
+-----------------------------
+Add_4_4_4	#1
+
+------------------
+Initial Conditions
+------------------
+
+	(_s0_X == 4'd1)
+
+
+
+-----------------
+Dependency List
+-----------------
+
+Depth: 0
+	(1-bit) #1	n1	u0	c0	e0	property	<= _s0_X, 
+
+Depth: 1
+	(4-bit) #1	n2	u1	c0	e0	_s0_X$next	<= 
+
+-----------------

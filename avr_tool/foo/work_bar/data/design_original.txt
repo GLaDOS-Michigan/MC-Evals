@@ -1,0 +1,21 @@
+---------------------
+WITHOUT PREPROCESSING
+---------------------
+
+-------------------------------
+Function Blocks ( out = F(in) )
+-------------------------------
+(type: control )	_p0_id16 = (_s0_X != 4'd0)
+(type: control )	_s0_X$next_rhs = (_i1_en?b$21:_s0_X)
+(type: Add     )	b$18     = Add_4_4_4(_s0_X, 4'd1)
+(type: control )	b$20     = (_s0_X == 4'd15)
+(type: control )	b$21     = (b$20?4'd1:b$18)
+
+------------------
+Initial Conditions
+------------------
+4 out of 4 initialized
+
+	(_s0_X == 4'd1)
+
+
