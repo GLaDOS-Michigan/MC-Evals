@@ -14,8 +14,8 @@ None == CHOOSE v : v \notin Value
 Message ==      [type : {"1a"}, bal : Ballot]  \* Set of all records with type in set {"1a"} and bal in set Ballot
            \cup [type : {"1b"}, acc : Acceptor, bal : Ballot,
                  mbal : Ballot \cup {-1}, mval : Value \cup {None}]
-           \cup [type : {"2a"}, bal : Ballot, val : Value]
-           \cup [type : {"2b"}, acc : Acceptor, bal : Ballot, val : Value]
+           \cup [type : {"2a"}, bal : Ballot, val : Value \cup {None}]
+           \cup [type : {"2b"}, acc : Acceptor, bal : Ballot, val : Value \cup {None}]
 
 VARIABLE maxBal,
          maxVBal,
@@ -97,10 +97,11 @@ Agreed(v,b) == \E Q \in Quorum2: \A a \in Q: Sent2b(a,v,b)
 \* All proposals with ballot >b must be of value v
 NoFutureProposal(v,b) == \A v2 \in Value: \A b2 \in Ballot: (b2 > b /\ Sent2a(v2,b2)) => v=v2
 
+NotNone2a == \A m \in msgs : m.type = "2a" => m.val \in Value
+NotNone2b == \A m \in msgs : m.type = "2b" => m.val \in Value
+
 \* Safety: If (v, b) is agreed, then all proposals with ballot >b must be of value v
-SafeValue == \A v \in Value: \A b \in Ballot: Agreed(v,b) => (NoFutureProposal(v,b) /\ ~ v = None)
+SafeValue == \A v \in Value \cup {None}: \A b \in Ballot: Agreed(v,b) => (NoFutureProposal(v,b) /\ v \in Value)
 
 =============================================================================
-\* Modification History
-\* Last modified Mon Feb 21 22:51:23 EST 2022 by nudzhang
-\* Created Mon Feb 21 20:33:15 EST 2022 by nudzhang
+
