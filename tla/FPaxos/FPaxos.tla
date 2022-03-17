@@ -52,6 +52,7 @@ Phase1b(a) == /\ \E m \in msgs :
 \* 1. Have yet to propose for this ballot b
 \* 2. There is a phase 1 quorum of messages that either support v, or carry no prior accepted values
 Phase2a(b, v) ==
+  /\ v \in Value
   /\ ~ \E m \in msgs : m.type = "2a" /\ m.bal = b
   /\ \E Q \in Quorum1 :
         LET Q1b == {m \in msgs : /\ m.type = "1b"
@@ -77,7 +78,7 @@ Phase2b(a) == \E m \in msgs : /\ m.type = "2a"
                                        bal |-> m.bal, val |-> m.val])
 
 Next == \/ \E b \in Ballot : \/ Phase1a(b)
-                             \/ \E v \in Value : Phase2a(b, v)
+                             \/ \E v \in Value \cup {None} : Phase2a(b, v)
         \/ \E a \in Acceptor : Phase1b(a) \/ Phase2b(a)
 
 Spec == Init /\ [][Next]_vars
