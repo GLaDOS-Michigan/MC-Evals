@@ -1,0 +1,15 @@
+MODULE main
+
+VAR x : 0..100;
+
+ASSIGN
+    init(x) := 0;
+    next(x) := 
+        case 
+            x < 100: x + 1;
+            TRUE: 0;
+        esac;
+
+INVARSPEC x >= 0;
+
+LTLSPEC F G F x = 10;

@@ -1,0 +1,32 @@
+MODULE main
+
+VAR 
+-- server * client
+link : array 1..1 of array 1..2 of boolean;
+
+INIT
+!link[1][1] & !link[1][2];
+
+DEFINE
+-- client 1 acquires lock
+c1_lock := next(link[1][1]) = !link[1][1] & !link[1][2]? TRUE : FALSE;
+
+-- client 2 acquires lock
+c2_lock := next(link[1][2]) = !link[1][1] & !link[1][2]? TRUE : FALSE;
+
+-- client 1 release lock
+c1_unlock := next(link[1][1]) = link[1][1] ? FALSE :link[1][1];
+
+-- client 2 release lock
+c2_unlock := next(link[1][2]) = link[1][2] ? FALSE :link[1][2];
+
+-- DS_Next
+global_next := c1_lock xor c2_lock xor c1_unlock xor c2_unlock;
+
+TRANS global_next;
+
+INVARSPEC 
+    -- Sever is never simultaneously linked to both clients.
+    !(link[1][1] & link[1][2]);
+
+LTLSPEC G F (link[1][1] | link[1][2])
