@@ -1,0 +1,6 @@
+.DS_Store
+
+states/
+*.toolbox
+MCToylock.cfg
+MCToylock.tla
