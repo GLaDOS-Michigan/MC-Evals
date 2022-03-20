@@ -135,4 +135,5 @@ TRANS
     node0_grant_2 | node1_receive_2 | node1_grant_3 | node0_receive_3;
 
 
-INVARSPEC !(held[0] & held[1]);
+-- CTL Spec
+SPEC AG !(held[0] & held[1]);
