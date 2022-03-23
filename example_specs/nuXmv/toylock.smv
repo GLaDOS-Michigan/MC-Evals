@@ -3,7 +3,6 @@ MODULE main
 -- VAR Node : { 0, 1 };
 -- VAR Epoch : { 0, 1, 2, 3 };
 
-
 VAR epoch : array 0..1 of {0, 1, 2, 3};
 VAR held : array 0..1 of boolean;
 VAR transfer : array 0..1 of array 0..3 of boolean;
@@ -134,6 +133,5 @@ ASSIGN
 TRANS
     node0_grant_2 | node1_receive_2 | node1_grant_3 | node0_receive_3;
 
-
 -- CTL Spec
-SPEC AG !(held[0] & held[1]);
+INVARSPEC !(held[0] & held[1]);
