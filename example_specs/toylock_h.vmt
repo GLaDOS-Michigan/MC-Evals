@@ -1,0 +1,331 @@
+(set-info :source |Haojun Ma (mahaojun@umich.edu)|)
+; SIZE: Node=2 and Epoch=2
+
+; Typecast bit to bool
+(define-sort bool_type () (_ BitVec 1))
+(define-fun bv_false () bool_type (_ bv0 1))
+(define-fun bv_true  () bool_type (_ bv1 1))
+(define-fun is_bool ((x bool_type)) Bool (or (= x bv_true) (= x bv_false)))
+
+; Define and enumerate transition system parameters
+(define-sort node_type () (_ BitVec 2))
+(define-fun node0 () node_type (_ bv0 2))
+(define-fun node1 () node_type (_ bv1 2))
+(define-fun is_node ((node node_type)) Bool (or (= node node0) (= node node1)))
+(define-sort epoch_type () (_ BitVec 3))
+(define-fun epoch0 () epoch_type (_ bv0 3))
+(define-fun epoch1 () epoch_type (_ bv1 3))
+(define-fun is_epoch ((epoch epoch_type)) Bool (or (= epoch epoch0) (= epoch epoch1)))
+
+; Declare transition system states
+(declare-fun le_0_0 () bool_type)
+(declare-fun le_0_0_next () bool_type)
+(define-fun .le_0_0 () bool_type (! le_0_0 :next le_0_0_next))
+(declare-fun le_1_0 () bool_type)
+(declare-fun le_1_0_next () bool_type)
+(define-fun .le_1_0 () bool_type (! le_1_0 :next le_1_0_next))
+(declare-fun le_0_1 () bool_type)
+(declare-fun le_0_1_next () bool_type)
+(define-fun .le_0_1 () bool_type (! le_0_1 :next le_0_1_next))
+(declare-fun le_1_1 () bool_type)
+(declare-fun le_1_1_next () bool_type)
+(define-fun .le_1_1 () bool_type (! le_1_1 :next le_1_1_next))
+(define-fun update_le ((newv bool_type) (prev bool_type) (cond Bool) (val bool_type)) Bool (= newv (ite cond val prev)))
+
+
+(define-fun axiom_axiom1 () Bool 
+    (and 
+        (= le_0_0 bv_true) 
+        (= le_1_1 bv_true)
+    )
+)
+
+; TODO: Not quite sure what this axiom is saying...
+; But I do think all of these axioms are about the partial ordering, i.e. Reflexivity, Anti-symmetry, Transitivity.
+(define-fun axiom_axiom2 () Bool 
+    (and 
+        (= 
+            (ite 
+                (=> 
+                    (= (ite (and (= le_0_0 bv_true) (= le_0_0 bv_true)) bv_true bv_false) bv_true) 
+                    (= le_0_0 bv_true)
+                ) 
+                bv_true 
+                bv_false
+            ) 
+            bv_true
+        )
+        
+        (= (ite (=> (= (ite (and (= le_0_0 bv_true) (= le_0_1 bv_true)) bv_true bv_false) bv_true) (= le_0_1 bv_true)) bv_true bv_false) bv_true)
+        (= (ite (=> (= (ite (and (= le_1_0 bv_true) (= le_0_0 bv_true)) bv_true bv_false) bv_true) (= le_1_0 bv_true)) bv_true bv_false) bv_true)
+        (= (ite (=> (= (ite (and (= le_1_0 bv_true) (= le_0_1 bv_true)) bv_true bv_false) bv_true) (= le_1_1 bv_true)) bv_true bv_false) bv_true)
+        (= (ite (=> (= (ite (and (= le_0_1 bv_true) (= le_1_0 bv_true)) bv_true bv_false) bv_true) (= le_0_0 bv_true)) bv_true bv_false) bv_true)
+        (= (ite (=> (= (ite (and (= le_0_1 bv_true) (= le_1_1 bv_true)) bv_true bv_false) bv_true) (= le_0_1 bv_true)) bv_true bv_false) bv_true)
+        (= (ite (=> (= (ite (and (= le_1_1 bv_true) (= le_1_0 bv_true)) bv_true bv_false) bv_true) (= le_1_0 bv_true)) bv_true bv_false) bv_true)
+        (= (ite (=> (= (ite (and (= le_1_1 bv_true) (= le_1_1 bv_true)) bv_true bv_false) bv_true) (= le_1_1 bv_true)) bv_true bv_false) bv_true)
+    )
+)
+
+
+(define-fun axiom_axiom3 () Bool 
+    (and 
+        (= (ite (=> (= (ite (and (= le_0_0 bv_true) (= le_0_0 bv_true)) bv_true bv_false) bv_true) (= (ite (= epoch0 epoch0) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)
+        (= (ite (=> (= (ite (and (= le_1_0 bv_true) (= le_0_1 bv_true)) bv_true bv_false) bv_true) (= (ite (= epoch1 epoch0) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)
+        (= (ite (=> (= (ite (and (= le_0_1 bv_true) (= le_1_0 bv_true)) bv_true bv_false) bv_true) (= (ite (= epoch0 epoch1) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)
+        (= (ite (=> (= (ite (and (= le_1_1 bv_true) (= le_1_1 bv_true)) bv_true bv_false) bv_true) (= (ite (= epoch1 epoch1) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)
+    )
+)
+
+; Axiom: For all m n, one of m<=n or n<=m must be true. 
+(define-fun axiom_axiom4 () Bool 
+    (and 
+        (= (ite (or (= le_0_0 bv_true) (= le_0_0 bv_true)) bv_true bv_false) bv_true) 
+        (= (ite (or (= le_1_0 bv_true) (= le_0_1 bv_true)) bv_true bv_false) bv_true)
+        (= (ite (or (= le_0_1 bv_true) (= le_1_0 bv_true)) bv_true bv_false) bv_true)
+        (= (ite (or (= le_1_1 bv_true) (= le_1_1 bv_true)) bv_true bv_false) bv_true)
+    )
+)
+
+(declare-fun zero () epoch_type)
+(declare-fun zero_next () epoch_type)
+(define-fun .zero () epoch_type (! zero :next zero_next))
+
+(define-fun axiom_axiom5 () Bool 
+    (and 
+        (= (ite (= zero epoch0) le_0_0 le_1_0) bv_true)
+        (= (ite (= zero epoch0) le_0_1 le_1_1) bv_true)
+    )
+)
+
+(declare-fun ep_0 () epoch_type)
+(declare-fun ep_0_next () epoch_type)
+(define-fun .ep_0 () epoch_type (! ep_0 :next ep_0_next))
+(declare-fun ep_1 () epoch_type)
+(declare-fun ep_1_next () epoch_type)
+(define-fun .ep_1 () epoch_type (! ep_1 :next ep_1_next))
+(define-fun update_ep ((newv epoch_type) (prev epoch_type) (cond Bool) (val epoch_type)) Bool (= newv (ite cond val prev)))
+
+(declare-fun held_0 () bool_type)
+(declare-fun held_0_next () bool_type)
+(define-fun .held_0 () bool_type (! held_0 :next held_0_next))
+(declare-fun held_1 () bool_type)
+(declare-fun held_1_next () bool_type)
+(define-fun .held_1 () bool_type (! held_1 :next held_1_next))
+(define-fun update_held ((newv bool_type) (prev bool_type) (cond Bool) (val bool_type)) Bool (= newv (ite cond val prev)))
+
+(declare-fun transfer_0_0 () bool_type)
+(declare-fun transfer_0_0_next () bool_type)
+(define-fun .transfer_0_0 () bool_type (! transfer_0_0 :next transfer_0_0_next))
+(declare-fun transfer_1_0 () bool_type)
+(declare-fun transfer_1_0_next () bool_type)
+(define-fun .transfer_1_0 () bool_type (! transfer_1_0 :next transfer_1_0_next))
+(declare-fun transfer_0_1 () bool_type)
+(declare-fun transfer_0_1_next () bool_type)
+(define-fun .transfer_0_1 () bool_type (! transfer_0_1 :next transfer_0_1_next))
+(declare-fun transfer_1_1 () bool_type)
+(declare-fun transfer_1_1_next () bool_type)
+(define-fun .transfer_1_1 () bool_type (! transfer_1_1 :next transfer_1_1_next))
+(define-fun update_transfer ((newv bool_type) (prev bool_type) (cond Bool) (val bool_type)) Bool (= newv (ite cond val prev)))
+
+(declare-fun locked_0_0 () bool_type)
+(declare-fun locked_0_0_next () bool_type)
+(define-fun .locked_0_0 () bool_type (! locked_0_0 :next locked_0_0_next))
+(declare-fun locked_1_0 () bool_type)
+(declare-fun locked_1_0_next () bool_type)
+(define-fun .locked_1_0 () bool_type (! locked_1_0 :next locked_1_0_next))
+(declare-fun locked_0_1 () bool_type)
+(declare-fun locked_0_1_next () bool_type)
+(define-fun .locked_0_1 () bool_type (! locked_0_1 :next locked_0_1_next))
+(declare-fun locked_1_1 () bool_type)
+(declare-fun locked_1_1_next () bool_type)
+(define-fun .locked_1_1 () bool_type (! locked_1_1 :next locked_1_1_next))
+(define-fun update_locked ((newv bool_type) (prev bool_type) (cond Bool) (val bool_type)) Bool (= newv (ite cond val prev)))
+
+(declare-fun first () node_type)
+(declare-fun first_next () node_type)
+(define-fun .first () node_type (! first :next first_next))
+(declare-fun e () epoch_type)
+(declare-fun e_next () epoch_type)
+(define-fun .e () epoch_type (! e :next e_next))
+
+
+(define-fun axiom_axiom6 () Bool 
+    (= 
+        (ite 
+            (= e zero)
+            bv_false 
+            bv_true
+        ) 
+        bv_true
+    )
+)
+
+; Initial state
+(define-fun .init () Bool (! 
+    (and 
+        ; first node holds the lock
+        (= held_0 (ite (= node0 first) bv_true bv_false))
+        (= held_1 (ite (= node1 first) bv_true bv_false))
+        ; first node has epoch e
+        (= ep_0 (ite (= node0 first) e zero))
+        (= ep_1 (ite (= node1 first) e zero))        
+        ; no transfer packets
+        (= transfer_0_0 bv_false)
+        (= transfer_0_1 bv_false)
+        (= transfer_1_0 bv_false)
+        (= transfer_1_1 bv_false)
+        ; no locked packets
+        (= locked_0_0 bv_false)
+        (= locked_0_1 bv_false)
+        (= locked_1_0 bv_false)
+        (= locked_1_1 bv_false)
+    ) 
+    :init true)
+)
+
+
+(define-fun grant_fun ((fml_n1 node_type) (fml_n2 node_type) (fml_e epoch_type)) Bool 
+    (and 
+        (is_node fml_n1) 
+        (is_node fml_n2) 
+        (is_epoch fml_e) 
+        ; if fml_n1 is node0 then held_0 is true. Else fml_n1 must be node1 and so held_1 is true.
+        (= (ite (= fml_n1 node0) held_0 held_1) bv_true)  
+        ; TODO: not sure what this chunk is
+        (= 
+            (ite 
+                (= 
+                    (ite 
+                        (and (= fml_e epoch0) (= (ite (= fml_n1 node0) ep_0 ep_1) epoch0)) 
+                        le_0_0 
+                        (ite 
+                            (and (= fml_e epoch1) (= (ite (= fml_n1 node0) ep_0 ep_1) epoch0)) 
+                            le_1_0 
+                            (ite (and (= fml_e epoch0) (= (ite (= fml_n1 node0) ep_0 ep_1) epoch1)) le_0_1 le_1_1)
+                        )
+                    ) 
+                    bv_true
+                )
+                bv_false 
+                bv_true
+            ) 
+            bv_true
+        )
+        (and 
+            (update_transfer transfer_0_0_next transfer_0_0 (and (= fml_e epoch0) (= fml_n2 node0)) bv_true) 
+            (update_transfer transfer_1_0_next transfer_1_0 (and (= fml_e epoch1) (= fml_n2 node0)) bv_true) 
+            (update_transfer transfer_0_1_next transfer_0_1 (and (= fml_e epoch0) (= fml_n2 node1)) bv_true) 
+            (update_transfer transfer_1_1_next transfer_1_1 (and (= fml_e epoch1) (= fml_n2 node1)) bv_true)
+        ) 
+        (and 
+            (update_held held_0_next held_0 (= fml_n1 node0) bv_false) 
+            (update_held held_1_next held_1 (= fml_n1 node1) bv_false))
+    )
+)
+
+
+(define-fun accept_fun ((fml_n node_type) (fml_e epoch_type)) Bool 
+    (and 
+        (is_node fml_n) (is_epoch fml_e) 
+        (and (or (= (ite (and (= fml_e epoch0) (= fml_n node0)) transfer_0_0 (ite (and (= fml_e epoch1) (= fml_n node0)) transfer_1_0 (ite (and (= fml_e epoch0) (= fml_n node1)) transfer_0_1 transfer_1_1))) bv_true))) 
+        (and 
+            (ite (and (or (= (ite (= (ite (and (= fml_e epoch0) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch0)) le_0_0 (ite (and (= fml_e epoch1) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch0)) le_1_0 (ite (and (= fml_e epoch0) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch1)) le_0_1 le_1_1))) bv_true) bv_false bv_true) bv_true))) (update_held held_0_next held_0 (and (= bv_true bv_true) (= fml_n node0)) bv_true) (= held_0 held_0_next)) 
+            (ite (and (or (= (ite (= (ite (and (= fml_e epoch0) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch0)) le_0_0 (ite (and (= fml_e epoch1) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch0)) le_1_0 (ite (and (= fml_e epoch0) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch1)) le_0_1 le_1_1))) bv_true) bv_false bv_true) bv_true))) (update_held held_1_next held_1 (and (= bv_true bv_true) (= fml_n node1)) bv_true) (= held_1 held_1_next))
+        ) 
+        (and 
+            (ite (and (or (= (ite (= (ite (and (= fml_e epoch0) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch0)) le_0_0 (ite (and (= fml_e epoch1) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch0)) le_1_0 (ite (and (= fml_e epoch0) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch1)) le_0_1 le_1_1))) bv_true) bv_false bv_true) bv_true))) (update_ep ep_0_next ep_0 (and (= bv_true bv_true) (= fml_n node0)) fml_e) (= ep_0 ep_0_next)) 
+            (ite (and (or (= (ite (= (ite (and (= fml_e epoch0) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch0)) le_0_0 (ite (and (= fml_e epoch1) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch0)) le_1_0 (ite (and (= fml_e epoch0) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch1)) le_0_1 le_1_1))) bv_true) bv_false bv_true) bv_true))) (update_ep ep_1_next ep_1 (and (= bv_true bv_true) (= fml_n node1)) fml_e) (= ep_1 ep_1_next))
+        ) 
+        (and 
+            (ite (and (or (= (ite (= (ite (and (= fml_e epoch0) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch0)) le_0_0 (ite (and (= fml_e epoch1) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch0)) le_1_0 (ite (and (= fml_e epoch0) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch1)) le_0_1 le_1_1))) bv_true) bv_false bv_true) bv_true))) (update_locked locked_0_0_next locked_0_0 (and (= bv_true bv_true) (= fml_e epoch0) (= fml_n node0)) bv_true) (= locked_0_0 locked_0_0_next)) 
+            (ite (and (or (= (ite (= (ite (and (= fml_e epoch0) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch0)) le_0_0 (ite (and (= fml_e epoch1) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch0)) le_1_0 (ite (and (= fml_e epoch0) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch1)) le_0_1 le_1_1))) bv_true) bv_false bv_true) bv_true))) (update_locked locked_1_0_next locked_1_0 (and (= bv_true bv_true) (= fml_e epoch1) (= fml_n node0)) bv_true) (= locked_1_0 locked_1_0_next)) 
+            (ite (and (or (= (ite (= (ite (and (= fml_e epoch0) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch0)) le_0_0 (ite (and (= fml_e epoch1) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch0)) le_1_0 (ite (and (= fml_e epoch0) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch1)) le_0_1 le_1_1))) bv_true) bv_false bv_true) bv_true))) (update_locked locked_0_1_next locked_0_1 (and (= bv_true bv_true) (= fml_e epoch0) (= fml_n node1)) bv_true) (= locked_0_1 locked_0_1_next)) 
+            (ite (and (or (= (ite (= (ite (and (= fml_e epoch0) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch0)) le_0_0 (ite (and (= fml_e epoch1) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch0)) le_1_0 (ite (and (= fml_e epoch0) (= (ite (and (= fml_n node0)) ep_0 ep_1) epoch1)) le_0_1 le_1_1))) bv_true) bv_false bv_true) bv_true))) (update_locked locked_1_1_next locked_1_1 (and (= bv_true bv_true) (= fml_e epoch1) (= fml_n node1)) bv_true) (= locked_1_1 locked_1_1_next))
+        )
+    )
+)
+
+; Declare actions
+(define-sort action_type () (_ BitVec 4))
+(define-fun grant() action_type (_ bv0 4))
+(define-fun accept() action_type (_ bv1 4))
+
+; Transition relation
+(declare-fun action () action_type)
+(declare-fun grant_fml_n1 () node_type)
+(declare-fun grant_fml_n2 () node_type)
+(declare-fun grant_fml_e () epoch_type)
+(declare-fun accept_fml_n () node_type)
+(declare-fun accept_fml_e () epoch_type)
+(define-fun .trans () Bool (! 
+    (and  
+        ; If action is grant
+        (=> (= action grant) 
+            (and 
+                (grant_fun grant_fml_n1 grant_fml_n2 grant_fml_e) 
+                (= le_0_0 le_0_0_next) 
+                (= le_1_0 le_1_0_next) 
+                (= le_0_1 le_0_1_next) 
+                (= le_1_1 le_1_1_next) 
+                (= locked_0_0 locked_0_0_next)
+                (= locked_1_0 locked_1_0_next) 
+                (= locked_0_1 locked_0_1_next) 
+                (= locked_1_1 locked_1_1_next) 
+                (= ep_0 ep_0_next) 
+                (= ep_1 ep_1_next)
+            )
+        ) 
+        ; If action is accept
+        (=> (= action accept) 
+            (and 
+                (accept_fun accept_fml_n accept_fml_e) 
+                (= le_0_0 le_0_0_next) 
+                (= le_1_0 le_1_0_next) 
+                (= le_0_1 le_0_1_next) 
+                (= le_1_1 le_1_1_next) 
+                (= transfer_0_0 transfer_0_0_next) 
+                (= transfer_1_0 transfer_1_0_next) 
+                (= transfer_0_1 transfer_0_1_next) 
+                (= transfer_1_1 transfer_1_1_next)
+            )
+        ) 
+        ; Stutter step
+        (=> (not (or (= action grant) (= action accept))) 
+            (and 
+                (= held_0 held_0_next) 
+                (= held_1 held_1_next) 
+                (= le_0_0 le_0_0_next) 
+                (= le_1_0 le_1_0_next) 
+                (= le_0_1 le_0_1_next) 
+                (= le_1_1 le_1_1_next) 
+                (= locked_0_0 locked_0_0_next) 
+                (= locked_1_0 locked_1_0_next) 
+                (= locked_0_1 locked_0_1_next) 
+                (= locked_1_1 locked_1_1_next) 
+                (= ep_0 ep_0_next) 
+                (= ep_1 ep_1_next) 
+                (= transfer_0_0 transfer_0_0_next) 
+                (= transfer_1_0 transfer_1_0_next) 
+                (= transfer_0_1 transfer_0_1_next) 
+                (= transfer_1_1 transfer_1_1_next)
+            )
+        )
+        axiom_axiom1 
+        axiom_axiom2 
+        axiom_axiom3 
+        axiom_axiom4 
+        (is_epoch zero) 
+        (= zero_next zero) 
+        (= zero epoch0) 
+        axiom_axiom5 
+        (is_epoch ep_0) 
+        (is_epoch ep_1) 
+        (is_node first) 
+        (= first_next first) 
+        (is_epoch e) 
+        (= e_next e) 
+        axiom_axiom6
+    ) 
+:trans true))
+
+(define-fun .prop () Bool (! (and (and (or (= (ite (=> (= (ite (and (= locked_0_0 bv_true) (= locked_0_0 bv_true)) bv_true bv_false) bv_true) (= (ite (= node0 node0) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)) (or (= (ite (=> (= (ite (and (= locked_1_0 bv_true) (= locked_1_0 bv_true)) bv_true bv_false) bv_true) (= (ite (= node0 node0) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)) (or (= (ite (=> (= (ite (and (= locked_0_0 bv_true) (= locked_0_1 bv_true)) bv_true bv_false) bv_true) (= (ite (= node0 node1) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)) (or (= (ite (=> (= (ite (and (= locked_1_0 bv_true) (= locked_1_1 bv_true)) bv_true bv_false) bv_true) (= (ite (= node0 node1) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)) (or (= (ite (=> (= (ite (and (= locked_0_1 bv_true) (= locked_0_0 bv_true)) bv_true bv_false) bv_true) (= (ite (= node1 node0) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)) (or (= (ite (=> (= (ite (and (= locked_1_1 bv_true) (= locked_1_0 bv_true)) bv_true bv_false) bv_true) (= (ite (= node1 node0) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)) (or (= (ite (=> (= (ite (and (= locked_0_1 bv_true) (= locked_0_1 bv_true)) bv_true bv_false) bv_true) (= (ite (= node1 node1) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)) (or (= (ite (=> (= (ite (and (= locked_1_1 bv_true) (= locked_1_1 bv_true)) bv_true bv_false) bv_true) (= (ite (= node1 node1) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)))) :invar-property 0))
