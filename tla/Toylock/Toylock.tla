@@ -43,10 +43,13 @@ Accept(n, e) == \E m \in msgs: /\ m.type = "Transfer"
                                /\ epoch' = [epoch EXCEPT ![n] = e]
                                /\ Send([type |-> "Locked", ep |-> e, src |-> n])
 
+Stutter == UNCHANGED <<epoch, held, msgs>>
+
 Next == \/ \E n1, n2 \in Node : 
             \E e \in Epoch : Grant(n1, n2, e)
         \/ \E n \in Node : 
             \E e \in Epoch : Accept(n, e)
+        \/ Stutter
         
 Spec == Init /\ [][Next]_vars
 
