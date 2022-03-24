@@ -1,137 +1,153 @@
+MODULE node
+VAR
+    id : {0, 1};
+    held : boolean;
+    epoch : {0, 1};
+
 MODULE main
 
--- VAR Node : { 0, 1 };
--- VAR Epoch : { 0, 1, 2, 3 };
+VAR
+    -- Nodes
+    n0 : node;
+    n1 : node;
+    -- Messages
+    transfer : array 0..1 of array 0..1 of boolean;
+    locked : array 0..1 of array 0..1 of boolean;
 
-VAR epoch : array 0..1 of {0, 1, 2, 3};
-VAR held : array 0..1 of boolean;
-VAR transfer : array 0..1 of array 0..3 of boolean;
-VAR locked : array 0..1 of array 0..3 of boolean;
+    -- Non-deterministic stuff
+    first_node : {0, 1};
+    first_epoch : {1};
+    action : {grant, accept, stutter};
+    actor : {0, 1};
+    grant_dst : {0, 1};
+    accept_epoch: {0, 1};
 
 DEFINE 
-    init_epoch := [1, 0];
-    init_held := [TRUE, FALSE];
-    init_transfer := [[FALSE, FALSE, FALSE, FALSE], [FALSE, FALSE, FALSE, FALSE]];
-    init_locked := [[FALSE, FALSE, FALSE, FALSE], [FALSE, FALSE, FALSE, FALSE]];
 
-    node0_grant_2 :=
-                held[0]
-                & epoch[0] = 1
+    TypeOK := n0.id = 0 & n1.id = 1;
 
-                & next(epoch[0]) = epoch[0]
-                & next(epoch[1]) = epoch[1]
-                & next(held[0]) = FALSE
-                & next(held[1]) = held[1]
+    constants_next := 
+        next(n0.id) = n0.id 
+        & next(n1.id) = n1.id 
+        & next(first_node) = first_node
+        & next(first_epoch) = first_epoch;
 
-                & next(transfer[0][0]) = transfer[0][0]
-                & next(transfer[0][1]) = transfer[0][1]
-                & next(transfer[0][2]) = transfer[0][2]
-                & next(transfer[0][3]) = transfer[0][3]
-                & next(transfer[1][0]) = transfer[1][0]
-                & next(transfer[1][1]) = transfer[1][1]
-                & next(transfer[1][2]) = TRUE
-                & next(transfer[1][3]) = transfer[1][3]
-                
-                & next(locked[0][0]) = locked[0][0]
-                & next(locked[0][1]) = locked[0][1]
-                & next(locked[0][2]) = locked[0][2]
-                & next(locked[0][3]) = locked[0][3]
-                & next(locked[1][0]) = locked[1][0]
-                & next(locked[1][1]) = locked[1][1]
-                & next(locked[1][2]) = locked[1][2]
-                & next(locked[1][3]) = locked[1][3];
+    n0_stutter := 
+        next(n0.held) = n0.held & next(n0.epoch) = n0.epoch;
+    n1_stutter := 
+        next(n1.held) = n1.held & next(n1.epoch) = n1.epoch;
+
+    stutter_step := 
+        constants_next
+        & n0_stutter
+        & n1_stutter
+        & next(transfer[0][0]) = transfer[0][0]
+        & next(transfer[0][1]) = transfer[0][1]
+        & next(transfer[1][0]) = transfer[1][0]
+        & next(transfer[1][1]) = transfer[1][1]
+        & next(locked[0][0]) = locked[0][0]
+        & next(locked[0][1]) = locked[0][1]
+        & next(locked[1][0]) = locked[1][0]
+        & next(locked[1][1]) = locked[1][1];
+
     
-    node1_receive_2 := 
-                !held[1]
-                & transfer[1][2]
-                & epoch[1] < 2
+    grant_step :=
+        constants_next
+        & action = grant
+        & (actor = 0 ? n0.held : TRUE)
+        & (actor = 1 ? n1.held : TRUE)
 
-                & next(epoch[0]) = epoch[0]
-                & next(epoch[1]) = 2
-                & next(held[0]) = held[0]
-                & next(held[1]) = TRUE
+        & (actor = 0 ? 
+            n1_stutter
+            & next(n0.held) = (n0.epoch = 1 ? TRUE : FALSE)
+            & next(n0.epoch) = n0.epoch
+            & next(transfer[0][0]) = (grant_dst=0 & n0.epoch+1=0 ? TRUE : transfer[0][0])
+            & next(transfer[0][1]) = (grant_dst=0 & n0.epoch+1=1 ? TRUE : transfer[0][1])
+            & next(transfer[1][0]) = (grant_dst=1 & n0.epoch+1=0 ? TRUE : transfer[1][0])
+            & next(transfer[1][1]) = (grant_dst=1 & n0.epoch+1=1 ? TRUE : transfer[1][1])
+            & next(locked[0][0]) = locked[0][0]
+            & next(locked[0][1]) = locked[0][1]
+            & next(locked[1][0]) = locked[1][0]
+            & next(locked[1][1]) = locked[1][1]
+        : 
+            n0_stutter
+            & next(n1.held) = (n1.epoch = 1 ? TRUE : FALSE)
+            & next(n1.epoch) = n1.epoch
+            & next(transfer[0][0]) = (grant_dst=0 & n1.epoch+1=0 ? TRUE : transfer[0][0])
+            & next(transfer[0][1]) = (grant_dst=0 & n1.epoch+1=1 ? TRUE : transfer[0][1])
+            & next(transfer[1][0]) = (grant_dst=1 & n1.epoch+1=0 ? TRUE : transfer[1][0])
+            & next(transfer[1][1]) = (grant_dst=1 & n1.epoch+1=1 ? TRUE : transfer[1][1])
+            & next(locked[0][0]) = locked[0][0]
+            & next(locked[0][1]) = locked[0][1]
+            & next(locked[1][0]) = locked[1][0]
+            & next(locked[1][1]) = locked[1][1]
+        );
 
-                & next(transfer[0][0]) = transfer[0][0]
-                & next(transfer[0][1]) = transfer[0][1]
-                & next(transfer[0][2]) = transfer[0][2]
-                & next(transfer[0][3]) = transfer[0][3]
-                & next(transfer[1][0]) = transfer[1][0]
-                & next(transfer[1][1]) = transfer[1][1]
-                & next(transfer[1][2]) = transfer[1][2]
-                & next(transfer[1][3]) = transfer[1][3]
-                
-                & next(locked[0][0]) = locked[0][0]
-                & next(locked[0][1]) = locked[0][1]
-                & next(locked[0][2]) = locked[0][2]
-                & next(locked[0][3]) = locked[0][3]
-                & next(locked[1][0]) = locked[1][0]
-                & next(locked[1][1]) = locked[1][1]
-                & next(locked[1][2]) = TRUE
-                & next(locked[1][3]) = locked[1][3];
-        
-    node1_grant_3 :=
-                held[1]
-                & epoch[1] = 2
+    accept_step :=
+        constants_next
+        & action = accept
+        & (actor = 0 ? 
+            !n0.held 
+            & accept_epoch > n0.epoch
+            & transfer[0][accept_epoch]
+        : 
+            !n1.held 
+            & accept_epoch > n1.epoch
+            & transfer[1][accept_epoch]
+        )
 
-                & next(epoch[0]) = epoch[0]
-                & next(epoch[1]) = epoch[1]
-                & next(held[0]) = held[0]
-                & next(held[1]) = FALSE
-
-                & next(transfer[0][0]) = transfer[0][0]
-                & next(transfer[0][1]) = transfer[0][1]
-                & next(transfer[0][2]) = transfer[0][2]
-                & next(transfer[0][3]) = TRUE
-                & next(transfer[1][0]) = transfer[1][0]
-                & next(transfer[1][1]) = transfer[1][1]
-                & next(transfer[1][2]) = transfer[1][2]
-                & next(transfer[1][3]) = transfer[1][3]
-                
-                & next(locked[0][0]) = locked[0][0]
-                & next(locked[0][1]) = locked[0][1]
-                & next(locked[0][2]) = locked[0][2]
-                & next(locked[0][3]) = locked[0][3]
-                & next(locked[1][0]) = locked[1][0]
-                & next(locked[1][1]) = locked[1][1]
-                & next(locked[1][2]) = locked[1][2]
-                & next(locked[1][3]) = locked[1][3];
-    
-    node0_receive_3 := 
-                !held[0]
-                & transfer[0][3]
-                & epoch[0] < 3
-
-                & next(epoch[0]) = 3
-                & next(epoch[1]) = epoch[1]
-                & next(held[0]) = TRUE
-                & next(held[1]) = held[1]
-
-                & next(transfer[0][0]) = transfer[0][0]
-                & next(transfer[0][1]) = transfer[0][1]
-                & next(transfer[0][2]) = transfer[0][2]
-                & next(transfer[0][3]) = transfer[0][3]
-                & next(transfer[1][0]) = transfer[1][0]
-                & next(transfer[1][1]) = transfer[1][1]
-                & next(transfer[1][2]) = transfer[1][2]
-                & next(transfer[1][3]) = TRUE
-                
-                & next(locked[0][0]) = locked[0][0]
-                & next(locked[0][1]) = locked[0][1]
-                & next(locked[0][2]) = locked[0][2]
-                & next(locked[0][3]) = locked[0][3]
-                & next(locked[1][0]) = locked[1][0]
-                & next(locked[1][1]) = locked[1][1]
-                & next(locked[1][2]) = locked[1][2]
-                & next(locked[1][3]) = locked[1][3];
+        & (actor = 0 ? 
+            n1_stutter
+            & next(n0.held) = TRUE
+            & next(n0.epoch) = accept_epoch
+            & next(transfer[0][0]) = transfer[0][0]
+            & next(transfer[0][1]) = transfer[0][1]
+            & next(transfer[1][0]) = transfer[1][0]
+            & next(transfer[1][1]) = transfer[1][1]
+            & next(locked[0][0]) = (accept_epoch = 0 ? TRUE : locked[0][0])
+            & next(locked[0][1]) = (accept_epoch = 1 ? TRUE : locked[0][1])
+            & next(locked[1][0]) = locked[1][0]
+            & next(locked[1][1]) = locked[1][1]
+        : 
+            n0_stutter
+            & next(n1.held) = (n1.epoch = 1 ? TRUE : FALSE)
+            & next(n1.epoch) = n1.epoch
+            & next(transfer[0][0]) = (grant_dst=0 & n1.epoch+1=0 ? TRUE : transfer[0][0])
+            & next(transfer[0][1]) = (grant_dst=0 & n1.epoch+1=1 ? TRUE : transfer[0][1])
+            & next(transfer[1][0]) = (grant_dst=1 & n1.epoch+1=0 ? TRUE : transfer[1][0])
+            & next(transfer[1][1]) = (grant_dst=1 & n1.epoch+1=1 ? TRUE : transfer[1][1])
+            & next(locked[0][0]) = locked[0][0]
+            & next(locked[0][1]) = locked[0][1]
+            & next(locked[1][0]) = (accept_epoch = 0 ? TRUE : locked[1][0])
+            & next(locked[1][1]) = (accept_epoch = 1 ? TRUE : locked[1][1])
+        );
 
 ASSIGN
-    init(epoch) := init_epoch;
-    init(held) := init_held;
-    init(transfer) := init_transfer; 
-    init(locked) := init_locked;
+    init(n0.id) := 0;
+    init(n0.held) := first_node = 0 ? TRUE : FALSE;
+    init(n0.epoch) := first_node = 0 ? first_epoch : 0;
+    init(n1.id) := 1;
+    init(n1.held) := first_node = 1 ? TRUE : FALSE;
+    init(n1.epoch) := first_node = 1 ? first_epoch : 0;
+    init(transfer[0][0]) := FALSE;
+    init(transfer[0][1]) := FALSE;
+    init(transfer[1][0]) := FALSE;
+    init(transfer[1][1]) := FALSE;
+    init(locked[0][0]) := FALSE;
+    init(locked[0][1]) := FALSE;
+    init(locked[1][0]) := FALSE;
+    init(locked[1][1]) := FALSE;
 
 TRANS
-    node0_grant_2 | node1_receive_2 | node1_grant_3 | node0_receive_3;
+    case
+        action = grant : grant_step
+        ;
+        action = accept : accept_step
+        ;
+        action = stutter : stutter_step;
+esac;
 
--- CTL Spec
-INVARSPEC !(held[0] & held[1]);
+
+INVARSPEC TypeOK
+INVARSPEC !(n0.held & n1.held);
+    
