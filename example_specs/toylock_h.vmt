@@ -328,4 +328,22 @@
     ) 
 :trans true))
 
-(define-fun .prop () Bool (! (and (and (or (= (ite (=> (= (ite (and (= locked_0_0 bv_true) (= locked_0_0 bv_true)) bv_true bv_false) bv_true) (= (ite (= node0 node0) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)) (or (= (ite (=> (= (ite (and (= locked_1_0 bv_true) (= locked_1_0 bv_true)) bv_true bv_false) bv_true) (= (ite (= node0 node0) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)) (or (= (ite (=> (= (ite (and (= locked_0_0 bv_true) (= locked_0_1 bv_true)) bv_true bv_false) bv_true) (= (ite (= node0 node1) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)) (or (= (ite (=> (= (ite (and (= locked_1_0 bv_true) (= locked_1_1 bv_true)) bv_true bv_false) bv_true) (= (ite (= node0 node1) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)) (or (= (ite (=> (= (ite (and (= locked_0_1 bv_true) (= locked_0_0 bv_true)) bv_true bv_false) bv_true) (= (ite (= node1 node0) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)) (or (= (ite (=> (= (ite (and (= locked_1_1 bv_true) (= locked_1_0 bv_true)) bv_true bv_false) bv_true) (= (ite (= node1 node0) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)) (or (= (ite (=> (= (ite (and (= locked_0_1 bv_true) (= locked_0_1 bv_true)) bv_true bv_false) bv_true) (= (ite (= node1 node1) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)) (or (= (ite (=> (= (ite (and (= locked_1_1 bv_true) (= locked_1_1 bv_true)) bv_true bv_false) bv_true) (= (ite (= node1 node1) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)))) :invar-property 0))
+(define-fun .prop () Bool (! 
+    ; No two locked messages of the same epoch belonging to different nodes
+    (and 
+        (=> 
+            (and (= locked_0_0 bv_true) (= locked_0_0 bv_true))
+            (= node0 node0)
+        )
+        (= (ite (=> (= (ite (and (= locked_1_0 bv_true) (= locked_1_0 bv_true)) bv_true bv_false) bv_true) (= (ite (= node0 node0) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)
+        (= (ite (=> (= (ite (and (= locked_0_0 bv_true) (= locked_0_1 bv_true)) bv_true bv_false) bv_true) (= (ite (= node0 node1) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)
+        (=> 
+            (and (= locked_1_0 bv_true) (= locked_1_1 bv_true)) 
+            (= node0 node1)
+        )
+        (= (ite (=> (= (ite (and (= locked_0_1 bv_true) (= locked_0_0 bv_true)) bv_true bv_false) bv_true) (= (ite (= node1 node0) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)
+        (= (ite (=> (= (ite (and (= locked_1_1 bv_true) (= locked_1_0 bv_true)) bv_true bv_false) bv_true) (= (ite (= node1 node0) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)
+        (= (ite (=> (= (ite (and (= locked_0_1 bv_true) (= locked_0_1 bv_true)) bv_true bv_false) bv_true) (= (ite (= node1 node1) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)
+        (= (ite (=> (= (ite (and (= locked_1_1 bv_true) (= locked_1_1 bv_true)) bv_true bv_false) bv_true) (= (ite (= node1 node1) bv_true bv_false) bv_true)) bv_true bv_false) bv_true)
+    ) 
+:invar-property 0))
