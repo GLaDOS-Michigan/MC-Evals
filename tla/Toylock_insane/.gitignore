@@ -1,0 +1,6 @@
+.DS_Store
+
+states/
+*.toolbox
+Toylock_Insane.cfg
+Toylock_Insane.tla
