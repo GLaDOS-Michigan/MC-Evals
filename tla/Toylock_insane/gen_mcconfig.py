@@ -31,7 +31,7 @@ def gen_tla_file_variables(num_nodes, num_epochs):
 
 
 def gen_tla_file_definitions(num_nodes, num_epochs):
-    res = ["\* System state", "vars == <<n0, n1, transfer, locked, first_node, first_epoch, action, actor, grant_dst, accept_ep>> "]
+    res = ["\* System state", "vars == <<%s, transfer, locked, first_node, first_epoch, action, actor, grant_dst, accept_ep>>" %(", ".join(["n%d" %i for i in range(num_nodes)]))]
     res.append("")
     res.append("nodeIDs == {%s}" %(", ".join([str(i) for i in range(num_nodes)])))
     res.append("epochs == {%s}" %(", ".join([str(e) for e in range(num_epochs)])))
@@ -150,7 +150,7 @@ def gen_tla_file_definitions_init(num_nodes):
     for i in range(num_nodes):
         clauses.append("n%d.id = %d" %(i,i))
         clauses.append("n%d.held = (first_node = %d)" %(i,i))
-        clauses.append("n%d.epoch = (IF first_node = %d THEN 1 ELSE 0)" %(i,i))
+        clauses.append("n%d.epoch = (IF first_node = %d THEN first_epoch ELSE 0)" %(i,i))
     clauses.append("\A id \in nodeIDs: \n            \A e \in epochs : /\ transfer[id][e] = FALSE\n                              /\ locked[id][e] = FALSE")
     return "Init == /\ " + "\n        /\ ".join(clauses)
 
