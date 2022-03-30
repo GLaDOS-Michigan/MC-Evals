@@ -11,7 +11,7 @@ def main(num_nodes, num_epochs):
 
 def gen_tla_file(num_nodes, num_epochs):
     """ Returns the Toylock_Insane.tla file contents as string """ 
-    res = ["------------------------------- MODULE Toylock_Insane -------------------------------", "EXTENDS Integers"]
+    res = ["------------------------------- MODULE Toylock_Insane -------------------------------", "EXTENDS Naturals"]
     res.append(gen_tla_file_variables(num_nodes, num_epochs))
     res.append(gen_tla_file_definitions(num_nodes, num_epochs))
     res.append(gen_tla_file_spec(num_nodes, num_epochs))
