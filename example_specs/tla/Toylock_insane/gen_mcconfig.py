@@ -135,7 +135,7 @@ def gen_tla_file_definitions_accept(num_nodes, num_epochs):
                 if i == act:
                     act_clauses.append("locked'[%d][%d] = (IF accept_ep = %d THEN TRUE ELSE locked[%d][%d])" %(i,e,e,i,e))
                 else:
-                    act_clauses.append("locked'[%d][%d] = locked'[%d][%d]" %(i,e,i,e))
+                    act_clauses.append("locked'[%d][%d] = locked[%d][%d]" %(i,e,i,e))
         if act == 0:
             case_bodies.append("CASE actor = 0 ->")
         else:
