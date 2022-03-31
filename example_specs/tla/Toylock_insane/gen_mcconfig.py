@@ -87,16 +87,15 @@ def gen_tla_file_definitions_stutter(num_nodes):
     res = []
     for i in range(num_nodes):
         res.append("n%d_stutter == n%d' = n%d" %(i,i,i))
-    res.append("stutter_step == UNCHANGED << %s, transfer, locked, first_node, first_epoch >>" %(", ".join(["n%d" %i for i in range(num_nodes)])))
+    res.append("stutter_step == %s /\ transfer'=transfer /\ locked'=locked" %(" /\ ".join(["n%d'=n%d" %(i,i) for i in range(num_nodes)])))
     return "\n".join(res)
 
 def gen_tla_file_definitions_grant(num_nodes, num_epochs):
-    res = ["grant_step ==", "action = \"grant\""]
+    res = ["grant_step ==", "action = \"grant\"", "transfer' \in [nodeIDs -> [epochs -> BOOLEAN]]"]
     case_bodies = []
     # Enumerate over each actor case
     for act in range(num_nodes):
         act_clauses = []
-        act_clauses.append("n%d.held" %act)
         for i in range(num_nodes):
             if i != act:
                 act_clauses.append("n%d_stutter" %i)
@@ -107,23 +106,20 @@ def gen_tla_file_definitions_grant(num_nodes, num_epochs):
                 act_clauses.append("transfer'[%d][%d] = (IF grant_dst = %d /\ n%d.epoch + 1 = %d THEN TRUE ELSE transfer[%d][%d])" %(i,e,i,act,e,i,e))
         act_clauses.append("UNCHANGED <<locked>>")
         if act == 0:
-            case_bodies.append("CASE actor = 0 ->")
+            case_bodies.append("CASE actor = 0 /\ n0.held ->")
         else:
-            case_bodies.append("     [] actor = %d ->" %act)
+            case_bodies.append("     [] actor = %d /\ n%d.held ->" %(act,act))
         case_bodies.append("        /\ " +"\n            /\ ".join(act_clauses))
-    case_bodies.append("     [] OTHER -> FALSE")
+    case_bodies.append("     [] OTHER -> stutter_step")
     res.append("\n    ".join(case_bodies))
     return "\n    /\ ".join(res)
 
 def gen_tla_file_definitions_accept(num_nodes, num_epochs):
-    res = ["accept_step ==", "action = \"accept\""]
+    res = ["accept_step ==", "action = \"accept\"", "locked' \in [nodeIDs -> [epochs -> BOOLEAN]]"]
     case_bodies = []
     # Enumerate over each actor case
     for act in range(num_nodes):
         act_clauses = []
-        act_clauses.append("~ n%d.held" %act)
-        act_clauses.append("accept_ep > n%d.epoch" %act)
-        act_clauses.append("transfer[%d][accept_ep]" %act)
         for i in range(num_nodes):
             if i != act:
                 act_clauses.append("n%d_stutter" %i)
@@ -137,27 +133,30 @@ def gen_tla_file_definitions_accept(num_nodes, num_epochs):
                 else:
                     act_clauses.append("locked'[%d][%d] = locked[%d][%d]" %(i,e,i,e))
         if act == 0:
-            case_bodies.append("CASE actor = 0 ->")
+            case_bodies.append("CASE actor = 0 /\ ~n0.held /\ accept_ep > n0.epoch /\ transfer[0][accept_ep] ->")
         else:
-            case_bodies.append("     [] actor = %d ->" %act)
+            case_bodies.append("     [] actor = %d /\ ~n%d.held /\ accept_ep > n%d.epoch /\ transfer[%d][accept_ep]->" %(act,act,act,act))
         case_bodies.append("        /\ " +"\n            /\ ".join(act_clauses))
-    case_bodies.append("     [] OTHER -> FALSE")
+    case_bodies.append("     [] OTHER -> stutter_step")
     res.append("\n    ".join(case_bodies))
     return "\n    /\ ".join(res)
 
 def gen_tla_file_definitions_init(num_nodes):
-    clauses = ["TypeOK"]
+    clauses = ["transfer \in [nodeIDs -> [epochs -> BOOLEAN]]",
+                "locked \in [nodeIDs -> [epochs -> BOOLEAN]]",
+                "first_node \in nodeIDs",
+                "first_epoch \in epochs\{ 0 }",
+                "action \in {\"grant\", \"accept\", \"stutter\"}",
+                "actor \in nodeIDs",
+                "grant_dst \in nodeIDs",
+                "accept_ep \in nodeIDs"]
     for i in range(num_nodes):
-        clauses.append("n%d.id = %d" %(i,i))
-        clauses.append("n%d.held = (first_node = %d)" %(i,i))
-        clauses.append("n%d.epoch = (IF first_node = %d THEN first_epoch ELSE 0)" %(i,i))
+        clauses.append("n%d = [id |-> %d, held |-> (first_node = %d), epoch |-> (IF first_node = %d THEN first_epoch ELSE 0)]" %(i,i,i,i))
     clauses.append("\A id \in nodeIDs: \n            \A e \in epochs : /\ transfer[id][e] = FALSE\n                              /\ locked[id][e] = FALSE")
     return "Init == /\ " + "\n        /\ ".join(clauses)
 
 def gen_tla_file_definitions_next():
     clauses = [ "constants_next", "non_deterministics_next",
-                "transfer' \in [nodeIDs -> [epochs -> BOOLEAN]]",
-                "locked' \in [nodeIDs -> [epochs -> BOOLEAN]]",
                 "CASE action = \"grant\" -> grant_step\n             [] action = \"accept\" -> accept_step\n             [] OTHER -> stutter_step"]
     return "Next == /\ " + "\n        /\ ".join(clauses)
 
