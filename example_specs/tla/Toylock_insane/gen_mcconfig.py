@@ -64,7 +64,7 @@ def gen_tla_file_definitions_TypeOK(num_nodes):
                 "locked \in [nodeIDs -> [epochs -> BOOLEAN]]", 
                 "first_node \in nodeIDs", "first_epoch \in epochs\{ 0 }", 
                 "action \in {\"grant\", \"accept\", \"stutter\"}", "actor \in nodeIDs", 
-                "grant_dst \in nodeIDs", "accept_ep \in nodeIDs"]
+                "grant_dst \in nodeIDs", "accept_ep \in epochs"]
     return "TypeOK == /\ " + "\n          /\ ".join(clauses)
 
 def gen_tla_file_definitions_constants_next(num_nodes):
@@ -80,7 +80,7 @@ def gen_tla_file_definitions_nondeter_next():
     clauses = ["action' \in {\"grant\", \"accept\", \"stutter\"}",
                "actor' \in nodeIDs",
                "grant_dst' \in nodeIDs",
-               "accept_ep' \in nodeIDs"]
+               "accept_ep' \in epochs"]
     return "non_deterministics_next == /\ " + "\n                           /\ ".join(clauses)
 
 def gen_tla_file_definitions_stutter(num_nodes):
