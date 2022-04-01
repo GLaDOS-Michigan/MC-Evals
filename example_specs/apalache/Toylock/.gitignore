@@ -3,6 +3,6 @@
 _apalache-out/
 states/
 *.toolbox
-MCToylock.cfg
-MCToylock.tla
+Toylock.cfg
+Toylock.tla
 *.log
