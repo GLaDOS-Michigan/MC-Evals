@@ -89,14 +89,15 @@ def gen_tla_file_accept():
                                 /\ Send([type |-> "Locked", ep |-> e, n |-> a1])"""
 
 def gen_tla_file_next():
-    return """Stutter == UNCHANGED <<epoch, held, msgs>>
-
-Next == /\ UNCHANGED << n0, n1 >>
-        /\  \/ \E a1, a2 \in Node : 
+    res = ["Stutter == UNCHANGED <<epoch, held, msgs>>"]
+    res.append("")
+    res.append("Next == /\ UNCHANGED << %s >> " %(", ".join(["n%d" %i for i in range(num_nodes)])))
+    res.append("""        /\  \/ \E a1, a2 \in Node : 
                 \E e \in Epoch : Grant(a1, a2, e)
             \/ \E a1 \in Node : 
                 \E e \in Epoch : Accept(a1, e)
-            \/ Stutter"""
+            \/ Stutter""")
+    return "\n".join(res)
 
 def gen_tla_file_specs():
     res = []
