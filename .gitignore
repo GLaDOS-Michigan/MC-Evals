@@ -3,7 +3,7 @@ tla-bin/
 nuXmv-2.0.0-Linux/
 avr_tool/
 I4/
-ic3po/
+ic3po_tool/
 apalache-0.23.0
 
 example_specs/out
