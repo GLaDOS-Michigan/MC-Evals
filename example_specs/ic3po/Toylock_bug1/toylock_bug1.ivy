@@ -8,6 +8,8 @@
 # Figure 4
 #
 
+# BUG: Node granting the lock does not grant with a strictly larger epoch.
+
 # A total order helper module
 module total_order(r) = {
     axiom r(X,X)                        # Reflexivity
@@ -62,7 +64,9 @@ after init {
 action grant(n1:node, n2:node, e:epoch) = {
     # release the lock and send a transfer message
     require held(n1);
-    require ~le(e, ep(n1));   # jump to some strictly higher epoch
+    # This is the BUG
+    require ~le(e, ep(n1)) | le(e, ep(n1));   # jump to some strictly higher epoch, or not...
+    # require ~le(e, ep(n1));   # jump to some strictly higher epoch
     transfer(e, n2) := true;
     held(n1) := false;
 }
