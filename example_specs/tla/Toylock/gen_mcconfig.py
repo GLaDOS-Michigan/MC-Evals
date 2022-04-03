@@ -21,6 +21,9 @@ def gen_tla_file(num_nodes, num_epochs):
     res.append("MCNode == {" + ", ".join(nodes) + "}")
     res.append("MCEpoch == 0..%d" %(num_epochs-1))
     res.append("")
+    res.append("\* SYMMETRY definition")
+    res.append("symmetries == Permutations(Node)")
+    res.append("")
     res.append("=============================================================================")
     return "\n".join(res)
 
@@ -35,7 +38,10 @@ def gen_cfg_file(num_nodes, num_epochs):
     res.append("  Node     <- MCNode")
     res.append("  Epoch    <- MCEpoch")
     res.append("")
-    res.append("INVARIANTS TypeOK Safety")
+    res.append("\* SYMMETRY definition")
+    res.append("SYMMETRY symmetries")
+    res.append("")
+    res.append("INVARIANTS TypeOK Safety SafetyI4")
     return "\n".join(res)
 
 if __name__ == "__main__":

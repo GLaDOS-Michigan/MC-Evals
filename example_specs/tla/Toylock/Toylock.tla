@@ -53,7 +53,10 @@ Next == \/ \E n1, n2 \in Node :
         
 Spec == Init /\ [][Next]_vars
 
-Safety == \A m1, m2 \in msgs :
+Safety == \A n1, n2 \in Node :
+            held[n1] /\ held[n2] => n1 = n2
+
+SafetyI4 == \A m1, m2 \in msgs :
             m1.type = "Locked" /\ m2.type = "Locked" /\ m1.ep = m2.ep => m1.src = m2.src
 
 
