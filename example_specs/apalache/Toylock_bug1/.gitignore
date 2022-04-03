@@ -1,0 +1,8 @@
+.DS_Store
+
+_apalache-out/
+states/
+*.toolbox
+Toylock_bug1.cfg
+Toylock_bug1.tla
+*.log
