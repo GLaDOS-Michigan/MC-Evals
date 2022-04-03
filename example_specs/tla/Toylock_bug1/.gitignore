@@ -1,0 +1,6 @@
+.DS_Store
+
+states/
+*.toolbox
+MCToylock_bug1.cfg
+MCToylock_bug1.tla
