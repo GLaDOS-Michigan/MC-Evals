@@ -99,7 +99,6 @@ def gen_grant_step_actor_action_str(num_nodes:int, num_epochs:int, curr:int):
         if i != curr:
             clauses.append("n%d_stutter" %i)
     # curr node takes the transition
-    clauses.append("grant_ep > n%d.epoch" %curr)
     clauses.append("next(n%d.held) = FALSE" %(curr))
     clauses.append("next(n%d.epoch) = n%d.epoch" %(curr,curr))
     # send appropriate transfer message
@@ -181,18 +180,9 @@ def gen_module_main_TRANS(num_nodes:int, num_epochs:int):
     
 def gen_module_main_SPEC(num_nodes:int, num_epochs:int):
     print("INVARSPEC TypeOK;")
-    print("INVARSPEC \n    %s;" %(gen_safety_spec_str(num_nodes, num_epochs)))
     print("INVARSPEC \n    %s;" %(gen_i4safety_spec_str(num_nodes, num_epochs)))
     # print("INVARSPEC \n    first_node=0 -> n0.held;")
     
-def gen_safety_spec_str(num_nodes:int, num_epochs:int):
-    """ No two nodes hold the lock """
-    clauses = []
-    for i in range(num_nodes):
-        for j in range(num_nodes):
-            if j>i:
-                clauses.append("!(n%d.held & n%d.held)" %(i,j))
-    return "\n    & ".join(clauses)
 
 def gen_i4safety_spec_str(num_nodes:int, num_epochs:int):
     """ No two locked message of same epoch belonging to different node """

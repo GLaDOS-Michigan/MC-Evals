@@ -58,7 +58,6 @@ DEFINE
         & case 
             actor=0 :
                 n1_stutter
-                & grant_ep > n0.epoch
                 & next(n0.held) = FALSE
                 & next(n0.epoch) = n0.epoch
                 & next(transfer[0][0]) = (grant_dst=0 & grant_ep=0 ? TRUE : transfer[0][0])
@@ -75,7 +74,6 @@ DEFINE
                 & next(locked[1][2]) = locked[1][2];
             actor=1 :
                 n0_stutter
-                & grant_ep > n1.epoch
                 & next(n1.held) = FALSE
                 & next(n1.epoch) = n1.epoch
                 & next(transfer[0][0]) = (grant_dst=0 & grant_ep=0 ? TRUE : transfer[0][0])
@@ -167,8 +165,6 @@ TRANS
     esac;
 
 INVARSPEC TypeOK;
-INVARSPEC 
-    !(n0.held & n1.held);
 INVARSPEC 
     (locked[0][0] & locked[0][0] -> n0.id = n0.id)
     & (locked[0][0] & locked[1][0] -> n0.id = n1.id)
