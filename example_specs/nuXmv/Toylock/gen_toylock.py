@@ -36,6 +36,7 @@ def gen_module_main_VAR(num_nodes:int, num_epochs:int):
     print("    action      : {grant, accept, stutter};")
     print("    actor       : {%s};" %(", ".join([str(i) for i in range(num_nodes)])))
     print("    grant_dst   : {%s};" %(", ".join([str(i) for i in range(num_nodes)])))
+    print("    grant_ep    : {%s};" %(", ".join([str(i) for i in range(num_nodes)])))
     print("    accept_ep   : {%s};" %(", ".join([str(i) for i in range(num_epochs)])))
     print("FROZENVAR")
     print("    first_node  : {%s};" %(", ".join([str(i) for i in range(num_nodes)])))
@@ -87,6 +88,7 @@ def gen_grant_step_str(num_nodes:int, num_epochs:int):
     actor_cases = []
     for i in range(num_nodes):
         actor_cases.append("actor=%d :\n                %s;" %(i, gen_grant_step_actor_action_str(num_nodes, num_epochs, i)))
+    actor_cases.append("TRUE:\n                stutter_step;")
     clauses.append("case \n            %s\n        esac" %("\n            ".join(actor_cases)))
     return "    grant_step :=\n        %s;" %("\n        & ".join(clauses))
 
@@ -97,12 +99,13 @@ def gen_grant_step_actor_action_str(num_nodes:int, num_epochs:int, curr:int):
         if i != curr:
             clauses.append("n%d_stutter" %i)
     # curr node takes the transition
+    clauses.append("grant_ep > n%d.epoch" %curr)
     clauses.append("next(n%d.held) = (n%d.epoch=%d ? TRUE : FALSE)" %(curr,curr,num_epochs-1))
     clauses.append("next(n%d.epoch) = n%d.epoch" %(curr,curr))
     # send appropriate transfer message
     for dst in range(num_nodes):
         for e in range(num_epochs):
-            clauses.append("next(transfer[%d][%d]) = (grant_dst=%d & n%d.epoch+1=%d ? TRUE : transfer[%d][%d])" %(dst,e,dst,curr,e,dst,e))
+            clauses.append("next(transfer[%d][%d]) = (grant_dst=%d & grant_ep=%d ? TRUE : transfer[%d][%d])" %(dst,e,dst,e,dst,e))
     # locked unchanged
     for i in range(num_nodes):
         for e in range(num_epochs):
@@ -116,15 +119,16 @@ def gen_accept_step_str(num_nodes:int, num_epochs:int):
     actor_cases = []
     for i in range(num_nodes):
         actor_i_clauses = []
-        actor_i_clauses.append("!n%d.held" %i)
-        actor_i_clauses.append("accept_ep > n%d.epoch" %i)
+        # actor_i_clauses.append("!n%d.held" %i)
+        # actor_i_clauses.append("accept_ep > n%d.epoch" %i)
         actor_i_clauses.append("transfer[%d][accept_ep]" %i)
         actor_cases.append("actor=%d: \n                %s;" %(i,"\n                & ".join(actor_i_clauses)))
     clauses.append("case\n            %s\n        esac" %("\n            ".join(actor_cases)))
     # actor actions
     actor_cases = []
     for i in range(num_nodes):
-        actor_cases.append("actor=%d :\n                %s;" %(i, gen_accept_step_actor_action_str(num_nodes, num_epochs, i)))
+        actor_cases.append("actor=%d & accept_ep > n%d.epoch:\n                %s;" %(i,i, gen_accept_step_actor_action_str(num_nodes, num_epochs, i)))
+    actor_cases.append("TRUE:\n                stutter_step;")
     clauses.append("case \n            %s\n        esac" %("\n            ".join(actor_cases)))
     return "    accept_step :=\n        %s;" %("\n        & ".join(clauses))
         
