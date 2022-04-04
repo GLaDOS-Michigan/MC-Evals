@@ -1,0 +1,8 @@
+#!/bin/bash
+
+I4_TRANSLATOR="/home/nudzhang/Documents/dafnymc/ivy/ivy/translate.py"
+
+num_nodes=$1
+num_epochs=$2
+
+python2 "$I4_TRANSLATOR" "toylock_bug1.ivy" "node=$num_nodes" "epoch=$num_epochs" > toylock_bug1.vmt
