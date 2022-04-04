@@ -36,7 +36,7 @@ def gen_module_main_VAR(num_nodes:int, num_epochs:int):
     print("    action      : {grant, accept, stutter};")
     print("    actor       : {%s};" %(", ".join([str(i) for i in range(num_nodes)])))
     print("    grant_dst   : {%s};" %(", ".join([str(i) for i in range(num_nodes)])))
-    print("    grant_ep    : {%s};" %(", ".join([str(i) for i in range(num_nodes)])))
+    print("    grant_ep    : {%s};" %(", ".join([str(i) for i in range(num_epochs)])))
     print("    accept_ep   : {%s};" %(", ".join([str(i) for i in range(num_epochs)])))
     print("FROZENVAR")
     print("    first_node  : {%s};" %(", ".join([str(i) for i in range(num_nodes)])))
@@ -183,6 +183,7 @@ def gen_module_main_SPEC(num_nodes:int, num_epochs:int):
     print("INVARSPEC TypeOK;")
     print("INVARSPEC \n    %s;" %(gen_safety_spec_str(num_nodes, num_epochs)))
     print("INVARSPEC \n    %s;" %(gen_i4safety_spec_str(num_nodes, num_epochs)))
+    # print("INVARSPEC \n    first_node=0 -> n0.held;")
     
 def gen_safety_spec_str(num_nodes:int, num_epochs:int):
     """ No two nodes hold the lock """
