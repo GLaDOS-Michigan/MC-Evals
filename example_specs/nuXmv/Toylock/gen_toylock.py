@@ -100,7 +100,7 @@ def gen_grant_step_actor_action_str(num_nodes:int, num_epochs:int, curr:int):
             clauses.append("n%d_stutter" %i)
     # curr node takes the transition
     clauses.append("grant_ep > n%d.epoch" %curr)
-    clauses.append("next(n%d.held) = (n%d.epoch=%d ? TRUE : FALSE)" %(curr,curr,num_epochs-1))
+    clauses.append("next(n%d.held) = FALSE" %(curr))
     clauses.append("next(n%d.epoch) = n%d.epoch" %(curr,curr))
     # send appropriate transfer message
     for dst in range(num_nodes):

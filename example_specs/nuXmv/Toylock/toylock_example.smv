@@ -59,7 +59,7 @@ DEFINE
             actor=0 :
                 n1_stutter
                 & grant_ep > n0.epoch
-                & next(n0.held) = (n0.epoch=2 ? TRUE : FALSE)
+                & next(n0.held) = FALSE
                 & next(n0.epoch) = n0.epoch
                 & next(transfer[0][0]) = (grant_dst=0 & grant_ep=0 ? TRUE : transfer[0][0])
                 & next(transfer[0][1]) = (grant_dst=0 & grant_ep=1 ? TRUE : transfer[0][1])
@@ -76,7 +76,7 @@ DEFINE
             actor=1 :
                 n0_stutter
                 & grant_ep > n1.epoch
-                & next(n1.held) = (n1.epoch=2 ? TRUE : FALSE)
+                & next(n1.held) = FALSE
                 & next(n1.epoch) = n1.epoch
                 & next(transfer[0][0]) = (grant_dst=0 & grant_ep=0 ? TRUE : transfer[0][0])
                 & next(transfer[0][1]) = (grant_dst=0 & grant_ep=1 ? TRUE : transfer[0][1])
