@@ -30,6 +30,8 @@ def gen_tla_file(num_nodes, num_epochs):
     res.append("")
     res.append(gen_tla_file_init(num_nodes))
     res.append("")
+    res.append("Stutter == UNCHANGED <<epoch, held, msgs>>")
+    res.append("")
     res.append(gen_tla_file_grant())
     res.append("")
     res.append(gen_tla_file_accept())
@@ -83,13 +85,15 @@ def gen_tla_file_accept():
     return """Accept(a1, e) == \E m \in msgs: /\ m.type = "Transfer"
                                 /\ m.ep = e
                                 /\ m.n = a1
-                                /\ epoch[a1] < e         \* above conjuncts are enabling condition
-                                /\ held' = [held EXCEPT ![a1] = TRUE]
-                                /\ epoch' = [epoch EXCEPT ![a1] = e]
-                                /\ Send([type |-> "Locked", ep |-> e, n |-> a1])"""
+                                /\ IF epoch[n] < e         \* above conjuncts are enabling condition
+                                   THEN /\ held' = [held EXCEPT ![n] = TRUE]
+                                        /\ epoch' = [epoch EXCEPT ![n] = e]
+                                        /\ Send([type |-> "Locked", ep |-> e, src |-> n])
+                                   ELSE 
+                                     Stutter"""
 
 def gen_tla_file_next():
-    res = ["Stutter == UNCHANGED <<epoch, held, msgs>>"]
+    res = []
     res.append("")
     res.append("Next == /\ UNCHANGED << %s >> " %(", ".join(["n%d" %i for i in range(num_nodes)])))
     res.append("""        /\  \/ \E a1, a2 \in Node : 
