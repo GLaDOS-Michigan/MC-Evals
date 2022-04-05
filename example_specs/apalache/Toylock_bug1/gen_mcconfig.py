@@ -3,7 +3,7 @@ from itertools import chain, combinations
 
 def main(num_nodes, num_epochs):
     tla_str = gen_tla_file(num_nodes, num_epochs)
-    cfg_str = gen_cfg_file(num_nodes)
+    cfg_str = gen_cfg_file()
     with open('Toylock_bug1.tla', 'w') as f:
         f.write(tla_str)
     with open('Toylock_bug1.cfg', 'w') as f:
@@ -113,7 +113,7 @@ def gen_tla_file_specs():
     return "\n\n".join(res)
 
 
-def gen_cfg_file(num_nodes):
+def gen_cfg_file():
     """ Returns the Toylock_bug1.tla file contents as string """    
     res = []
     res.append("SPECIFICATION Spec")
