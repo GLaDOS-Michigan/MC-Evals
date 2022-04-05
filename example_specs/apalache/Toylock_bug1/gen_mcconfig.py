@@ -3,7 +3,7 @@ from itertools import chain, combinations
 
 def main(num_nodes, num_epochs):
     tla_str = gen_tla_file(num_nodes, num_epochs)
-    cfg_str = gen_cfg_file(num_nodes, num_epochs)
+    cfg_str = gen_cfg_file(num_nodes)
     with open('Toylock_bug1.tla', 'w') as f:
         f.write(tla_str)
     with open('Toylock_bug1.cfg', 'w') as f:
@@ -87,10 +87,10 @@ def gen_tla_file_accept():
     return """Accept(a1, e) == \E m \in msgs: /\ m.type = "Transfer"
                                 /\ m.ep = e
                                 /\ m.n = a1
-                                /\ IF epoch[n] < e         \* above conjuncts are enabling condition
-                                   THEN /\ held' = [held EXCEPT ![n] = TRUE]
-                                        /\ epoch' = [epoch EXCEPT ![n] = e]
-                                        /\ Send([type |-> "Locked", ep |-> e, src |-> n])
+                                /\ IF epoch[a1] < e         \* above conjuncts are enabling condition
+                                   THEN /\ held' = [held EXCEPT ![a1] = TRUE]
+                                        /\ epoch' = [epoch EXCEPT ![a1] = e]
+                                        /\ Send([type |-> "Locked", ep |-> e, n |-> a1])
                                    ELSE 
                                      Stutter"""
 
@@ -113,10 +113,8 @@ def gen_tla_file_specs():
     return "\n\n".join(res)
 
 
-def gen_cfg_file(num_nodes, num_epochs):
-    """ Returns the Toylock_bug1.tla file contents as string """ 
-    nodes = ["n%d" %i for i in range(num_nodes)]
-    
+def gen_cfg_file(num_nodes):
+    """ Returns the Toylock_bug1.tla file contents as string """    
     res = []
     res.append("SPECIFICATION Spec")
     res.append("")

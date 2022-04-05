@@ -40,6 +40,8 @@ Init == /\ n0 = "n0"
               /\ \A n \in Node :
                   a # n => epoch[n] = 0 /\ ~held[n]
 
+Stutter == UNCHANGED <<epoch, held, msgs>>
+
 Grant(a1, a2, e) == /\ held[a1]         \* enabling condition: a1 holds lock
                     \* This is the BUG
                     \* /\ e > epoch[a1]    \* pick some epoch > epoch(a1)
@@ -50,12 +52,13 @@ Grant(a1, a2, e) == /\ held[a1]         \* enabling condition: a1 holds lock
 Accept(a1, e) == \E m \in msgs: /\ m.type = "Transfer"
                                 /\ m.ep = e
                                 /\ m.n = a1
-                                /\ epoch[a1] < e         \* above conjuncts are enabling condition
-                                /\ held' = [held EXCEPT ![a1] = TRUE]
-                                /\ epoch' = [epoch EXCEPT ![a1] = e]
-                                /\ Send([type |-> "Locked", ep |-> e, n |-> a1])
+                                /\ IF epoch[a1] < e         \* above conjuncts are enabling condition
+                                   THEN /\ held' = [held EXCEPT ![a1] = TRUE]
+                                        /\ epoch' = [epoch EXCEPT ![a1] = e]
+                                        /\ Send([type |-> "Locked", ep |-> e, n |-> a1])
+                                   ELSE 
+                                     Stutter
 
-Stutter == UNCHANGED <<epoch, held, msgs>>
 
 Next == /\ UNCHANGED << n0, n1 >> 
         /\  \/ \E a1, a2 \in Node : 
